@@ -4,6 +4,8 @@
 
 公開版はSupabaseのメール・マジックリンク認証を使います。訪問者はメールアドレスごとのSupabaseユーザーIDで識別され、登録メールはSupabase Dashboardの「Authentication → Users」で確認できます。
 
+訪問者用URLは `https://hitokoto-touma816.basicoak.chatgpt.site/?view=visitor` です。投稿者画面の「訪問者URLをコピー」からも取得できます。
+
 ## 起動
 
 Node.js 20以上で動作します。画像・アイコン・日本語フォントは同梱され、実行時に外部サービスへの接続は不要です。
@@ -26,6 +28,12 @@ npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
 - PC・タブレット・スマートフォン対応。
 
 投稿・画像・リアクションは `data/posts.json` に保存されます（Git管理対象外）。初回はサンプル投稿が表示されます。実際の投稿やリアクションを行うと保存されます。保存先は `DATA_FILE` で変更できます。現在はローカルプレビュー用の単一Nodeプロセス構成です。
+
+## Supabaseの共有保存とリアルタイム更新
+
+公開版で投稿を全訪問者へ共有し、投稿・リアクションを即時反映するには、Supabase Dashboardの「SQL Editor」で [`supabase/setup.sql`](supabase/setup.sql) を実行します。実行前に `YOUR_OWNER_EMAIL@example.com` を投稿者本人がメールログインに使うアドレスへ変更してください。
+
+設定後は投稿・プロフィール・リアクションをSupabaseへ保存し、Realtimeで開いている画面へ反映します。テーブルが未設定の間は、壊れた画面を出さないためブラウザ内保存へ自動的に切り替わります。Sites用のAPIアダプターは [`deployment/preview-api.js`](deployment/preview-api.js) にあります。
 
 ## 検証
 

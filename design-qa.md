@@ -12,7 +12,7 @@ final result: passed
 - [P1, resolved] Visitor identity used an anonymous browser UUID. It now uses the authenticated Supabase user ID; Supabase Authentication records the corresponding email address.
 - [P1, resolved] A signed-in visitor could have encountered the old owner-password entry point. Email-authenticated visitors now see a read-only timeline and reactions, while the hashed owner-email match enables posting controls.
 - Typography, spacing, blue color tokens, raster assets and Japanese copy were checked in all three captures. No actionable P0/P1/P2 findings remain.
-- Primary interactions tested: signed-out gate, magic-link request, owner recognition, owner composer, visitor read-only view, visitor reaction and mobile overflow.
+- Primary interactions tested: signed-out gate, magic-link request, owner recognition, owner composer, visitor URL action, forced visitor mode through `?view=visitor`, visitor reaction and mobile overflow.
 - Console errors checked: none. Results: `qa/email-auth-results.json`.
 
 ## Profile icon update

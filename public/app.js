@@ -12,8 +12,9 @@ let profile = { name:'とうま', handle:'touma816', avatar:'/assets/avatar.webp
 let profileAvatarDraft = profile.avatar;
 let ownerPassword = sessionStorage.getItem('ownerPassword') || '';
 const emailAuth = Boolean(window.hitokotoAuthUser);
+const visitorOnly = new URLSearchParams(location.search).get('view') === 'visitor';
 let authenticated = false;
-let visitorView = false;
+let visitorView = visitorOnly;
 let images = [];
 let processing = false;
 let submitting = false;
@@ -71,7 +72,7 @@ async function loadPosts() {
 function updateOwnerUI() {
   const compose = authenticated && !visitorView;
   $('#composePanel').hidden = !compose; $('#visitorNote').hidden = compose;
-  $('#ownerButton').hidden = emailAuth || authenticated; $('#viewButton').hidden = !authenticated; $('#logoutButton').hidden = emailAuth || !authenticated;
+  $('#ownerButton').hidden = emailAuth || authenticated; $('#copyVisitorUrlButton').hidden = !authenticated; $('#viewButton').hidden = !authenticated || visitorOnly; $('#logoutButton').hidden = emailAuth || !authenticated;
   $('#viewButton').setAttribute('aria-label', visitorView ? '投稿画面に戻る' : '訪問者の表示を見る');
   $('#viewButton span').textContent = visitorView ? '投稿画面に戻る' : '訪問者の表示を見る';
   renderFeed();
@@ -80,11 +81,16 @@ function openLogin() { $('#loginError').textContent = ''; loginDialog.showModal(
 async function unlock(password) {
   ownerPassword = password;
   await request('/api/owner/check', { method:'POST' }, true);
-  authenticated = true; visitorView = false;
+  authenticated = true; visitorView = visitorOnly;
   sessionStorage.setItem('ownerPassword', ownerPassword);
   updateOwnerUI(); loginDialog.close(); $('#password').value = ''; postText.focus();
 }
 $('#ownerButton').addEventListener('click', openLogin);
+$('#copyVisitorUrlButton').addEventListener('click', async () => {
+  const url = new URL(location.href); url.search = ''; url.hash = ''; url.searchParams.set('view','visitor');
+  try { await navigator.clipboard.writeText(url.href); showToast('訪問者用URLをコピーしました'); }
+  catch { showToast(url.href); }
+});
 $('#closeLogin').addEventListener('click', () => loginDialog.close());
 $('#loginForm').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; $('#loginError').textContent = '';
@@ -228,6 +234,14 @@ feed.addEventListener('click', async event => {
 });
 document.addEventListener('click', event => { if (!event.target.closest('.emoji-picker') && !event.target.closest('.reaction-add')) closePicker(false); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && pickerPost) { closePicker(); event.preventDefault(); } });
+let liveRefreshTimer;
+window.addEventListener('hitokoto:remote-change', event => {
+  clearTimeout(liveRefreshTimer);
+  liveRefreshTimer = setTimeout(async () => {
+    if (event.detail === 'site_profile') await loadProfile();
+    await loadPosts();
+  }, 120);
+});
 $('#closeImage').addEventListener('click', () => $('#imageDialog').close());
 for (const dialog of [loginDialog, profileDialog, $('#imageDialog')]) dialog.addEventListener('click', event => { if (event.target === dialog) { const box = dialog.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close(); } });
 async function init() {

@@ -16,6 +16,7 @@
 <div class="sidebar-bottom"><p>日々のかけらを、ここに。<br>気持ちはリアクションで。</p>
 <div id="authIdentity" class="auth-identity" hidden><span id="authEmail"></span><button id="emailLogoutButton" class="sidebar-button" type="button" aria-label="メールアカウントからログアウト"><img src="/assets/icons/sign-out.svg" alt=""><span>メールからログアウト</span></button></div>
 <button id="ownerButton" class="sidebar-button" type="button" aria-label="投稿者ログイン"><img src="/assets/icons/sign-in.svg" alt=""><span>投稿者ログイン</span></button>
+<button id="copyVisitorUrlButton" class="sidebar-button" type="button" aria-label="訪問者用URLをコピー" hidden><img src="/assets/icons/eye.svg" alt=""><span>訪問者URLをコピー</span></button>
 <button id="viewButton" class="sidebar-button" type="button" aria-label="訪問者の表示を見る" hidden><img src="/assets/icons/eye.svg" alt=""><span>訪問者の表示を見る</span></button>
 <button id="logoutButton" class="sidebar-button" type="button" aria-label="ログアウト" hidden><img src="/assets/icons/sign-out.svg" alt=""><span>ログアウト</span></button>
 </div></aside>
@@ -35,5 +36,5 @@
 <form id="loginForm"><label for="password">投稿者用パスワード</label><input id="password" name="password" type="password" autocomplete="current-password" required><p id="loginError" class="form-error" role="alert"></p><button class="primary-button" type="submit">ログインする</button></form><p class="login-footnote">読むだけ・リアクションはログイン不要です。</p></dialog>
 <dialog id="profileDialog" class="profile-dialog" aria-labelledby="profileTitle"><button class="icon-button dialog-close" id="closeProfile" type="button" aria-label="閉じる"><img src="/assets/icons/x.svg" alt=""></button><button id="profileAvatarButton" class="avatar-edit-button" type="button"><img id="profileAvatarPreview" src="/assets/avatar.webp" alt="変更するアイコンのプレビュー" width="82" height="82"><span>アイコンを変更</span></button><input id="profileAvatarInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2 id="profileTitle">プロフィールを変更</h2><p>タイムラインに表示するアイコンと名前を設定できます。</p><form id="profileForm"><label for="displayName">表示名</label><input id="displayName" name="displayName" maxlength="30" autocomplete="name" required><label for="handle">ユーザー名</label><div class="handle-input"><span>@</span><input id="handle" name="handle" maxlength="30" pattern="[A-Za-z0-9_]+" required></div><p id="profileError" class="form-error" role="alert"></p><button class="primary-button" type="submit">保存する</button></form></dialog>
 <dialog id="imageDialog" class="image-dialog" aria-label="投稿画像を拡大表示"><button id="closeImage" class="icon-button" type="button" aria-label="画像を閉じる"><img src="/assets/icons/x.svg" alt=""></button><img id="expandedImage" alt="投稿された画像"></dialog>
-<div id="toast" class="toast" role="status" aria-live="polite"></div><script type="module" src="/auth.js"></script>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><script src="/vendor/supabase.js"></script><script type="module" src="/auth.js"></script>
 </body></html>
