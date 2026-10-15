@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "viewports": [
+    320,
+    390,
+    720,
+    990,
+    1440
+  ],
+  "checks": [
+    "default profile",
+    "500 character counter",
+    "desktop post size 20px",
+    "profile edit and persistence",
+    "blue theme",
+    "mobile post size 16px",
+    "responsive overflow"
+  ],
+  "consoleErrors": []
+}

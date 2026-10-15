@@ -47,8 +47,21 @@ test('owner can post images without text; image validation and authentication pr
     assert.equal((await post({ text:'test',images })).status,400);
   }
   assert.equal((await post({ text:'', images:[] })).status,400);
-  assert.equal((await post({ text:'x'.repeat(281) })).status,400);
+  assert.equal((await post({ text:'x'.repeat(501) })).status,400);
   assert.equal((await fetch(`${app.baseUrl}/api/posts`, { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ images:[tinyPng] }) })).status,401);
+});
+
+test('profile is public, owner-editable, and persisted for visitors', async t => {
+  const app = await startApp(); t.after(app.close);
+  const initial = await (await fetch(`${app.baseUrl}/api/profile`)).json();
+  assert.deepEqual(initial,{name:'とうま',handle:'touma816'});
+  const unauthorized = await fetch(`${app.baseUrl}/api/profile`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({name:'別の人',handle:'other'})});
+  assert.equal(unauthorized.status,401);
+  const updatedResponse = await fetch(`${app.baseUrl}/api/profile`,{method:'PUT',headers:ownerHeaders,body:JSON.stringify({name:'とうまさん',handle:'touma_816'})});
+  assert.equal(updatedResponse.status,200);
+  assert.deepEqual(await updatedResponse.json(),{name:'とうまさん',handle:'touma_816'});
+  assert.deepEqual(await (await fetch(`${app.baseUrl}/api/profile`)).json(),{name:'とうまさん',handle:'touma_816'});
+  assert.equal((await fetch(`${app.baseUrl}/api/profile`,{method:'PUT',headers:ownerHeaders,body:JSON.stringify({name:'',handle:'bad-handle'})})).status,400);
 });
 
 test('reactions are per visitor, toggle independently, and persist across requests', async t => {

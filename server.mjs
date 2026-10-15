@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const publicDir = join(rootDir, "public");
 const seedPeople = count => Array.from({ length: count }, (_, i) => `seed-${i}`);
+const defaultProfile = { name: "とうま", handle: "touma816" };
 const seedPosts = [
   { id: "first-coffee", text: "朝のコーヒー、やっぱり最高だなあ。\n湯気の向こうで、今日もいい日になりそう ☕", images: ["/assets/coffee.webp"], createdAt: new Date(Date.now() - 3 * 3600000).toISOString(), likedBy: seedPeople(12), reactions: { "😂": seedPeople(4), "👏": seedPeople(8) } },
   { id: "autumn-walk", text: "近所の散歩で、秋を見つけた。", images: ["/assets/autumn.webp"], createdAt: new Date(Date.now() - 6 * 3600000).toISOString(), likedBy: seedPeople(12), reactions: { "😂": seedPeople(4), "👏": seedPeople(8) } }
@@ -62,26 +63,26 @@ function getCookie(req, key) {
 
 export function createApp({ dataFile = process.env.DATA_FILE || join(rootDir, "data", "posts.json"), ownerPassword = process.env.OWNER_PASSWORD || "" } = {}) {
   let updateQueue = Promise.resolve();
-  async function readPosts() {
+  async function readState() {
     try {
       const data = JSON.parse(await readFile(dataFile, "utf8"));
-      return Array.isArray(data.posts) ? data.posts : [];
+      return { posts: Array.isArray(data.posts) ? data.posts : [], profile: data.profile && typeof data.profile.name === "string" ? data.profile : structuredClone(defaultProfile) };
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
-      return structuredClone(seedPosts);
+      return { posts: structuredClone(seedPosts), profile: structuredClone(defaultProfile) };
     }
   }
-  async function savePosts(posts) {
+  async function saveState(state) {
     await mkdir(dirname(dataFile), { recursive: true });
     const tempFile = `${dataFile}.${process.pid}.tmp`;
-    await writeFile(tempFile, JSON.stringify({ posts }, null, 2));
+    await writeFile(tempFile, JSON.stringify(state, null, 2));
     await rename(tempFile, dataFile);
   }
-  function updatePosts(change) {
+  function updateState(change) {
     const task = updateQueue.then(async () => {
-      const posts = await readPosts();
-      const result = await change(posts);
-      await savePosts(posts);
+      const state = await readState();
+      const result = await change(state);
+      await saveState(state);
       return result;
     });
     updateQueue = task.catch(() => {});
@@ -98,8 +99,22 @@ export function createApp({ dataFile = process.env.DATA_FILE || join(rootDir, "d
       if (req.method === "POST" && url.pathname === "/api/owner/check") {
         return isOwner(req) ? sendJson(res, 200, { ok: true }) : sendJson(res, 401, { error: "パスワードが違います" });
       }
+      if (req.method === "GET" && url.pathname === "/api/profile") {
+        return sendJson(res, 200, (await readState()).profile);
+      }
+      if (req.method === "PUT" && url.pathname === "/api/profile") {
+        if (!isOwner(req)) return sendJson(res, 401, { error: "プロフィールを変更するにはログインしてください" });
+        const body = await parseBody(req);
+        const name = typeof body.name === "string" ? body.name.trim() : "";
+        const handle = typeof body.handle === "string" ? body.handle.trim().replace(/^@/, "") : "";
+        if (!name || name.length > 30) return sendJson(res, 400, { error: "名前は1〜30文字で入力してください" });
+        if (!/^[A-Za-z0-9_]{1,30}$/.test(handle)) return sendJson(res, 400, { error: "ユーザー名は半角英数字と_で入力してください" });
+        const profile = { name, handle };
+        await updateState(state => { state.profile = profile; });
+        return sendJson(res, 200, profile);
+      }
       if (req.method === "GET" && url.pathname === "/api/posts") {
-        return sendJson(res, 200, (await readPosts()).map(post => publicPost(post, visitorId)), visitorHeaders);
+        return sendJson(res, 200, (await readState()).posts.map(post => publicPost(post, visitorId)), visitorHeaders);
       }
       if (req.method === "POST" && url.pathname === "/api/posts") {
         if (!ownerPassword) return sendJson(res, 503, { error: "投稿用パスワードが設定されていません" });
@@ -107,9 +122,9 @@ export function createApp({ dataFile = process.env.DATA_FILE || join(rootDir, "d
         const body = await parseBody(req);
         const text = typeof body.text === "string" ? body.text.trim() : "";
         const images = validateImages(body.images);
-        if ((!text && !images.length) || text.length > 280) return sendJson(res, 400, { error: "画像かつぶやきを入力してください（280文字まで）" });
+        if ((!text && !images.length) || text.length > 500) return sendJson(res, 400, { error: "画像かつぶやきを入力してください（500文字まで）" });
         const post = { id: randomUUID(), text, images, createdAt: new Date().toISOString(), likedBy: [], reactions: {} };
-        await updatePosts(posts => posts.unshift(post));
+        await updateState(state => state.posts.unshift(post));
         return sendJson(res, 201, publicPost(post, visitorId));
       }
       const likeMatch = url.pathname.match(/^\/api\/posts\/([^/]+)\/(like|reactions)$/);
@@ -117,8 +132,8 @@ export function createApp({ dataFile = process.env.DATA_FILE || join(rootDir, "d
         const id = decodeURIComponent(likeMatch[1]);
         const emoji = likeMatch[2] === "like" ? "❤️" : (await parseBody(req)).emoji;
         if (!allowedEmoji.includes(emoji)) return sendJson(res, 400, { error: "リアクションを選んでください" });
-        const result = await updatePosts(posts => {
-          const post = posts.find(item => item.id === id);
+        const result = await updateState(state => {
+          const post = state.posts.find(item => item.id === id);
           if (!post) return null;
           post.likedBy ||= [];
           post.reactions ||= {};
@@ -134,10 +149,10 @@ export function createApp({ dataFile = process.env.DATA_FILE || join(rootDir, "d
       if (req.method === "DELETE" && deleteMatch) {
         if (!isOwner(req)) return sendJson(res, 401, { error: "削除するにはログインしてください" });
         const id = decodeURIComponent(deleteMatch[1]);
-        const removed = await updatePosts(posts => {
-          const index = posts.findIndex(item => item.id === id);
+        const removed = await updateState(state => {
+          const index = state.posts.findIndex(item => item.id === id);
           if (index < 0) return false;
-          posts.splice(index, 1);
+          state.posts.splice(index, 1);
           return true;
         });
         return removed ? sendJson(res, 200, { ok: true }) : sendJson(res, 404, { error: "投稿が見つかりません" });

@@ -3,10 +3,12 @@ const feed = $('#feed');
 const postText = $('#postText');
 const imageInput = $('#imageInput');
 const loginDialog = $('#loginDialog');
+const profileDialog = $('#profileDialog');
 const emojiNames = { '❤️':'いいね', '😂':'笑った', '👏':'拍手', '😭':'泣ける', '😮':'びっくり', '😄':'うれしい', '👍':'いいね', '✨':'きらきら', '💖':'ときめいた', '🎉':'おめでとう', '🤔':'考え中', '😌':'ほっとした', '👀':'気になる', '🔥':'最高', '🥹':'感動', '💜':'紫のハート', '☕':'コーヒー', '🍁':'秋だね', '🌱':'応援' };
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
 const icon = name => `<img src="/assets/icons/${name}.svg" alt="">`;
 let posts = [];
+let profile = { name:'とうま', handle:'touma816' };
 let ownerPassword = sessionStorage.getItem('ownerPassword') || '';
 let authenticated = false;
 let visitorView = false;
@@ -20,6 +22,15 @@ const pendingReactions = new Set();
 function showToast(message) {
   clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').classList.add('show');
   toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 2600);
+}
+function applyProfile() {
+  document.querySelectorAll('[data-profile-name]').forEach(element => { element.textContent = profile.name; });
+  document.querySelectorAll('[data-profile-handle]').forEach(element => { element.textContent = `@${profile.handle}`; });
+  document.querySelectorAll('.profile-avatar').forEach(image => { image.alt = `${profile.name}のプロフィール画像`; });
+}
+async function loadProfile() {
+  try { profile = await request('/api/profile'); applyProfile(); }
+  catch { applyProfile(); }
 }
 async function request(path, options = {}, owner = false) {
   const response = await fetch(path, { ...options, headers: { 'content-type':'application/json', ...(owner ? { 'x-owner-password':ownerPassword } : {}), ...options.headers } });
@@ -41,7 +52,7 @@ function reactionMarkup(post) {
   return groups.map(item => `<button class="reaction" type="button" data-emoji="${item.emoji}" aria-label="${item.emoji} ${emojiNames[item.emoji] || 'リアクション'} ${item.count}件${item.reacted ? '、取り消す' : ''}" aria-pressed="${item.reacted}"><span class="reaction-emoji">${item.emoji}</span><span>${item.count}</span></button>`).join('') + `<button class="reaction-add" type="button" aria-label="絵文字でリアクション" aria-expanded="false" aria-controls="picker-${escapeHtml(post.id)}">${icon('plus')}</button>`;
 }
 function postMarkup(post) {
-  return `<article class="post" data-id="${escapeHtml(post.id)}"><img class="avatar" src="/assets/avatar.webp" alt="" width="64" height="64"><div class="post-main"><div class="post-byline"><strong>はる</strong><span class="post-handle">@haru</span><span class="post-separator">·</span><time class="post-time" datetime="${escapeHtml(post.createdAt)}" title="${escapeHtml(new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',dateStyle:'long',timeStyle:'short'}).format(new Date(post.createdAt)))}">${relativeTime(post.createdAt)}</time>${authenticated && !visitorView ? `<button class="delete-button" type="button" aria-label="この投稿を削除">${icon('trash')}</button>` : ''}</div>${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ''}${post.images.length ? `<div class="post-images${post.images.length > 1 ? ' multiple' : ''}">${post.images.map((image, index) => `<button class="photo-button" type="button" data-image="${index}" aria-label="投稿画像${index + 1}を拡大"><img src="${escapeHtml(image)}" alt="はるの投稿画像 ${index + 1}" loading="lazy"></button>`).join('')}</div>` : ''}<div class="reaction-bar">${reactionMarkup(post)}</div></div></article>`;
+  return `<article class="post" data-id="${escapeHtml(post.id)}"><img class="avatar" src="/assets/avatar.webp" alt="" width="64" height="64"><div class="post-main"><div class="post-byline"><strong>${escapeHtml(profile.name)}</strong><span class="post-handle">@${escapeHtml(profile.handle)}</span><span class="post-separator">·</span><time class="post-time" datetime="${escapeHtml(post.createdAt)}" title="${escapeHtml(new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',dateStyle:'long',timeStyle:'short'}).format(new Date(post.createdAt)))}">${relativeTime(post.createdAt)}</time>${authenticated && !visitorView ? `<button class="delete-button" type="button" aria-label="この投稿を削除">${icon('trash')}</button>` : ''}</div>${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ''}${post.images.length ? `<div class="post-images${post.images.length > 1 ? ' multiple' : ''}">${post.images.map((image, index) => `<button class="photo-button" type="button" data-image="${index}" aria-label="投稿画像${index + 1}を拡大"><img src="${escapeHtml(image)}" alt="${escapeHtml(profile.name)}の投稿画像 ${index + 1}" loading="lazy"></button>`).join('')}</div>` : ''}<div class="reaction-bar">${reactionMarkup(post)}</div></div></article>`;
 }
 function renderFeed() {
   closePicker(false);
@@ -82,8 +93,22 @@ $('#logoutButton').addEventListener('click', () => {
   authenticated = false; ownerPassword = ''; visitorView = false; sessionStorage.removeItem('ownerPassword');
   images = []; postText.value = ''; renderPreviews(); updateComposer(); updateOwnerUI(); showToast('ログアウトしました');
 });
+$('#profileButton').addEventListener('click', () => {
+  if (!authenticated) { openLogin(); return; }
+  $('#displayName').value = profile.name; $('#handle').value = profile.handle; $('#profileError').textContent = '';
+  profileDialog.showModal(); $('#displayName').focus();
+});
+$('#closeProfile').addEventListener('click', () => profileDialog.close());
+$('#profileForm').addEventListener('submit', async event => {
+  event.preventDefault(); const button = event.submitter; button.disabled = true; $('#profileError').textContent = '';
+  try {
+    profile = await request('/api/profile', { method:'PUT', body:JSON.stringify({ name:$('#displayName').value, handle:$('#handle').value }) }, true);
+    applyProfile(); renderFeed(); profileDialog.close(); showToast('プロフィールを更新しました');
+  } catch (error) { $('#profileError').textContent = error.message; }
+  finally { button.disabled = false; }
+});
 function updateComposer() {
-  $('#counter').textContent = `${postText.value.length} / 280`;
+  $('#counter').textContent = `${postText.value.length} / 500`;
   $('#postButton').disabled = submitting || processing || (!postText.value.trim() && !images.length);
   $('#postButton span').textContent = submitting ? '投稿中…' : processing ? '画像を準備中…' : '投稿する';
   $('#addImageButton').disabled = submitting || processing || images.length >= 4;
@@ -180,8 +205,9 @@ feed.addEventListener('click', async event => {
 document.addEventListener('click', event => { if (!event.target.closest('.emoji-picker') && !event.target.closest('.reaction-add')) closePicker(false); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && pickerPost) { closePicker(); event.preventDefault(); } });
 $('#closeImage').addEventListener('click', () => $('#imageDialog').close());
-for (const dialog of [loginDialog, $('#imageDialog')]) dialog.addEventListener('click', event => { if (event.target === dialog) { const box = dialog.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close(); } });
+for (const dialog of [loginDialog, profileDialog, $('#imageDialog')]) dialog.addEventListener('click', event => { if (event.target === dialog) { const box = dialog.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close(); } });
 async function init() {
+  await loadProfile();
   await loadPosts();
   if (ownerPassword) {
     try { await unlock(ownerPassword); }
