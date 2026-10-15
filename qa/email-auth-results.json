@@ -5,6 +5,7 @@
     "magic-link request",
     "owner recognition",
     "owner composer",
+    "avatar crop and persistence",
     "visitor read-only view",
     "visitor reaction",
     "mobile overflow"

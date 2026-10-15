@@ -15,6 +15,14 @@ final result: passed
 - Primary interactions tested: signed-out gate, magic-link request, owner recognition, owner composer, visitor read-only view, visitor reaction and mobile overflow.
 - Console errors checked: none. Results: `qa/email-auth-results.json`.
 
+## Profile icon update
+
+- Source requirement: let the owner change the profile icon.
+- Browser-rendered evidence: `qa/avatar-change.png`, 990 × 604 pixels at deviceScaleFactor 1, showing the selected image preview in the profile editor.
+- The image action is placed before the profile title, uses the same circular avatar treatment, and clearly changes from the default portrait to the selected image before saving.
+- JPEG, PNG and WebP files are center-cropped to a 512 × 512 WebP. The saved icon updates the sidebar, composer, post bylines and favicon and persists after reload.
+- API validation rejects remote URLs and invalid image payloads. No actionable P0/P1/P2 findings remain.
+
 ## Target and evidence
 
 - Source visual truth: the four annotated 990 × 604 browser screenshots supplied by the user, backed by the previous owner-state capture `qa/desktop-owner-final.png`.

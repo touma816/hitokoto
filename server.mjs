@@ -7,7 +7,7 @@ import { randomUUID } from "node:crypto";
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const publicDir = join(rootDir, "public");
 const seedPeople = count => Array.from({ length: count }, (_, i) => `seed-${i}`);
-const defaultProfile = { name: "とうま", handle: "touma816" };
+const defaultProfile = { name: "とうま", handle: "touma816", avatar: "/assets/avatar.webp" };
 const seedPosts = [
   { id: "first-coffee", text: "朝のコーヒー、やっぱり最高だなあ。\n湯気の向こうで、今日もいい日になりそう ☕", images: ["/assets/coffee.webp"], createdAt: new Date(Date.now() - 3 * 3600000).toISOString(), likedBy: seedPeople(12), reactions: { "😂": seedPeople(4), "👏": seedPeople(8) } },
   { id: "autumn-walk", text: "近所の散歩で、秋を見つけた。", images: ["/assets/autumn.webp"], createdAt: new Date(Date.now() - 6 * 3600000).toISOString(), likedBy: seedPeople(12), reactions: { "😂": seedPeople(4), "👏": seedPeople(8) } }
@@ -66,7 +66,7 @@ export function createApp({ dataFile = process.env.DATA_FILE || join(rootDir, "d
   async function readState() {
     try {
       const data = JSON.parse(await readFile(dataFile, "utf8"));
-      return { posts: Array.isArray(data.posts) ? data.posts : [], profile: data.profile && typeof data.profile.name === "string" ? data.profile : structuredClone(defaultProfile) };
+      return { posts: Array.isArray(data.posts) ? data.posts : [], profile: data.profile && typeof data.profile.name === "string" ? { ...defaultProfile, ...data.profile } : structuredClone(defaultProfile) };
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
       return { posts: structuredClone(seedPosts), profile: structuredClone(defaultProfile) };
@@ -109,8 +109,12 @@ export function createApp({ dataFile = process.env.DATA_FILE || join(rootDir, "d
         const handle = typeof body.handle === "string" ? body.handle.trim().replace(/^@/, "") : "";
         if (!name || name.length > 30) return sendJson(res, 400, { error: "名前は1〜30文字で入力してください" });
         if (!/^[A-Za-z0-9_]{1,30}$/.test(handle)) return sendJson(res, 400, { error: "ユーザー名は半角英数字と_で入力してください" });
-        const profile = { name, handle };
-        await updateState(state => { state.profile = profile; });
+        let requestedAvatar;
+        if (body.avatar !== undefined) requestedAvatar = body.avatar === defaultProfile.avatar ? defaultProfile.avatar : validateImages([body.avatar])[0];
+        const profile = await updateState(state => {
+          state.profile = { name, handle, avatar:requestedAvatar || state.profile?.avatar || defaultProfile.avatar };
+          return state.profile;
+        });
         return sendJson(res, 200, profile);
       }
       if (req.method === "GET" && url.pathname === "/api/posts") {

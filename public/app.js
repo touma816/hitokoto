@@ -8,7 +8,8 @@ const emojiNames = { '❤️':'いいね', '😂':'笑った', '👏':'拍手', 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
 const icon = name => `<img src="/assets/icons/${name}.svg" alt="">`;
 let posts = [];
-let profile = { name:'とうま', handle:'touma816' };
+let profile = { name:'とうま', handle:'touma816', avatar:'/assets/avatar.webp' };
+let profileAvatarDraft = profile.avatar;
 let ownerPassword = sessionStorage.getItem('ownerPassword') || '';
 const emailAuth = Boolean(window.hitokotoAuthUser);
 let authenticated = false;
@@ -27,7 +28,9 @@ function showToast(message) {
 function applyProfile() {
   document.querySelectorAll('[data-profile-name]').forEach(element => { element.textContent = profile.name; });
   document.querySelectorAll('[data-profile-handle]').forEach(element => { element.textContent = `@${profile.handle}`; });
+  document.querySelectorAll('[data-profile-avatar]').forEach(image => { image.src = profile.avatar; });
   document.querySelectorAll('.profile-avatar').forEach(image => { image.alt = `${profile.name}のプロフィール画像`; });
+  document.querySelector('link[rel="icon"]').href = profile.avatar;
 }
 async function loadProfile() {
   try { profile = await request('/api/profile'); applyProfile(); }
@@ -53,7 +56,7 @@ function reactionMarkup(post) {
   return groups.map(item => `<button class="reaction" type="button" data-emoji="${item.emoji}" aria-label="${item.emoji} ${emojiNames[item.emoji] || 'リアクション'} ${item.count}件${item.reacted ? '、取り消す' : ''}" aria-pressed="${item.reacted}"><span class="reaction-emoji">${item.emoji}</span><span>${item.count}</span></button>`).join('') + `<button class="reaction-add" type="button" aria-label="絵文字でリアクション" aria-expanded="false" aria-controls="picker-${escapeHtml(post.id)}">${icon('plus')}</button>`;
 }
 function postMarkup(post) {
-  return `<article class="post" data-id="${escapeHtml(post.id)}"><img class="avatar" src="/assets/avatar.webp" alt="" width="64" height="64"><div class="post-main"><div class="post-byline"><strong>${escapeHtml(profile.name)}</strong><span class="post-handle">@${escapeHtml(profile.handle)}</span><span class="post-separator">·</span><time class="post-time" datetime="${escapeHtml(post.createdAt)}" title="${escapeHtml(new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',dateStyle:'long',timeStyle:'short'}).format(new Date(post.createdAt)))}">${relativeTime(post.createdAt)}</time>${authenticated && !visitorView ? `<button class="delete-button" type="button" aria-label="この投稿を削除">${icon('trash')}</button>` : ''}</div>${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ''}${post.images.length ? `<div class="post-images${post.images.length > 1 ? ' multiple' : ''}">${post.images.map((image, index) => `<button class="photo-button" type="button" data-image="${index}" aria-label="投稿画像${index + 1}を拡大"><img src="${escapeHtml(image)}" alt="${escapeHtml(profile.name)}の投稿画像 ${index + 1}" loading="lazy"></button>`).join('')}</div>` : ''}<div class="reaction-bar">${reactionMarkup(post)}</div></div></article>`;
+  return `<article class="post" data-id="${escapeHtml(post.id)}"><img class="avatar" src="${escapeHtml(profile.avatar)}" alt="" width="64" height="64"><div class="post-main"><div class="post-byline"><strong>${escapeHtml(profile.name)}</strong><span class="post-handle">@${escapeHtml(profile.handle)}</span><span class="post-separator">·</span><time class="post-time" datetime="${escapeHtml(post.createdAt)}" title="${escapeHtml(new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',dateStyle:'long',timeStyle:'short'}).format(new Date(post.createdAt)))}">${relativeTime(post.createdAt)}</time>${authenticated && !visitorView ? `<button class="delete-button" type="button" aria-label="この投稿を削除">${icon('trash')}</button>` : ''}</div>${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ''}${post.images.length ? `<div class="post-images${post.images.length > 1 ? ' multiple' : ''}">${post.images.map((image, index) => `<button class="photo-button" type="button" data-image="${index}" aria-label="投稿画像${index + 1}を拡大"><img src="${escapeHtml(image)}" alt="${escapeHtml(profile.name)}の投稿画像 ${index + 1}" loading="lazy"></button>`).join('')}</div>` : ''}<div class="reaction-bar">${reactionMarkup(post)}</div></div></article>`;
 }
 function renderFeed() {
   closePicker(false);
@@ -96,14 +99,24 @@ $('#logoutButton').addEventListener('click', () => {
 });
 $('#profileButton').addEventListener('click', () => {
   if (!authenticated) { if (emailAuth) showToast('プロフィールは投稿者だけ変更できます'); else openLogin(); return; }
+  profileAvatarDraft = profile.avatar; $('#profileAvatarPreview').src = profileAvatarDraft;
   $('#displayName').value = profile.name; $('#handle').value = profile.handle; $('#profileError').textContent = '';
   profileDialog.showModal(); $('#displayName').focus();
 });
 $('#closeProfile').addEventListener('click', () => profileDialog.close());
+$('#profileAvatarButton').addEventListener('click', () => $('#profileAvatarInput').click());
+$('#profileAvatarInput').addEventListener('change', async () => {
+  const file = $('#profileAvatarInput').files[0]; $('#profileAvatarInput').value = '';
+  if (!file) return;
+  $('#profileAvatarButton').disabled = true; $('#profileError').textContent = '';
+  try { profileAvatarDraft = await prepareAvatar(file); $('#profileAvatarPreview').src = profileAvatarDraft; }
+  catch (error) { $('#profileError').textContent = error.message; }
+  finally { $('#profileAvatarButton').disabled = false; }
+});
 $('#profileForm').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; $('#profileError').textContent = '';
   try {
-    profile = await request('/api/profile', { method:'PUT', body:JSON.stringify({ name:$('#displayName').value, handle:$('#handle').value }) }, true);
+    profile = await request('/api/profile', { method:'PUT', body:JSON.stringify({ name:$('#displayName').value, handle:$('#handle').value, avatar:profileAvatarDraft }) }, true);
     applyProfile(); renderFeed(); profileDialog.close(); showToast('プロフィールを更新しました');
   } catch (error) { $('#profileError').textContent = error.message; }
   finally { button.disabled = false; }
@@ -133,6 +146,16 @@ async function prepareImage(file) {
   const data = canvas.toDataURL('image/webp', .86);
   if (data.length > 2_600_000) throw new Error('画像が大きすぎます。小さな画像を選んでください。');
   return data;
+}
+async function prepareAvatar(file) {
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('アイコンはJPEG・PNG・WebPから選んでください。');
+  if (file.size > 20_000_000) throw new Error('元の画像は20MB以下にしてください。');
+  let bitmap;
+  try { bitmap = await createImageBitmap(file); } catch { throw new Error('画像を読み込めませんでした。別の画像でお試しください。'); }
+  const side = Math.min(bitmap.width, bitmap.height), x = (bitmap.width - side) / 2, y = (bitmap.height - side) / 2;
+  const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+  canvas.getContext('2d').drawImage(bitmap, x, y, side, side, 0, 0, 512, 512); bitmap.close();
+  return canvas.toDataURL('image/webp', .88);
 }
 imageInput.addEventListener('change', async () => {
   const files = Array.from(imageInput.files); imageInput.value = '';
