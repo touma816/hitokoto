@@ -1,0 +1,19 @@
+{
+  "name": "aikozin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@fontsource/noto-sans-jp": "^5.3.1",
+    "@fontsource/zen-maru-gothic": "^5.3.1",
+    "@phosphor-icons/core": "^2.1.1"
+  }
+}

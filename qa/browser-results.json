@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "viewports": [
+    320,
+    390,
+    720,
+    768,
+    1024,
+    1440,
+    1487
+  ],
+  "checks": [
+    "visitor cannot compose",
+    "heart toggle persists",
+    "emoji selection",
+    "image lightbox",
+    "owner login",
+    "image+text post persists",
+    "remove attachment",
+    "image-only post",
+    "delete owner post",
+    "visitor preview",
+    "logout",
+    "separate visitor read-only",
+    "responsive overflow"
+  ],
+  "consoleErrors": []
+}

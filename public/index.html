@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#493665"><meta name="description" content="日々のひとことに、気持ちをひとつ。投稿は私だけ、リアクションはみんなから。">
+<title>ひとこと — 今日のひとこと</title><link rel="icon" href="/assets/avatar.webp" type="image/webp"><link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#feed">つぶやきへ移動</a>
+<aside class="sidebar" aria-label="プロフィール">
+<a class="brand" href="/">ひとこと<img class="brand-spark" src="/assets/icons/sparkle.svg" alt=""></a>
+<div class="profile"><img class="profile-avatar" src="/assets/avatar.webp" alt="はるのプロフィール画像" width="88" height="88"><strong>はる</strong><span>@haru</span></div>
+<div class="sidebar-bottom"><p>日々のかけらを、ここに。<br>気持ちはリアクションで。</p>
+<button id="ownerButton" class="sidebar-button" type="button" aria-label="投稿者ログイン"><img src="/assets/icons/sign-in.svg" alt=""><span>投稿者ログイン</span></button>
+<button id="viewButton" class="sidebar-button" type="button" aria-label="訪問者の表示を見る" hidden><img src="/assets/icons/eye.svg" alt=""><span>訪問者の表示を見る</span></button>
+<button id="logoutButton" class="sidebar-button" type="button" aria-label="ログアウト" hidden><img src="/assets/icons/sign-out.svg" alt=""><span>ログアウト</span></button>
+</div></aside>
+<main class="main">
+<header class="page-heading"><h1>今日のひとこと<img class="heading-spark" src="/assets/icons/sparkle.svg" alt=""></h1><p>コメントのかわりに、気持ちをひとつ。</p></header>
+<section id="composePanel" class="composer" aria-label="新しいつぶやき" hidden>
+<img class="avatar compose-avatar" src="/assets/avatar.webp" alt="" width="64" height="64">
+<form id="postForm" class="compose-form"><label for="postText" class="sr-only">つぶやき（280文字まで）</label><textarea id="postText" rows="2" maxlength="280" placeholder="いまの気分を、ひとこと。"></textarea>
+<div class="compose-bottom"><div id="imagePreviews" class="image-previews"></div><button id="addImageButton" class="add-image" type="button"><img src="/assets/icons/image.svg" alt=""><span>画像を追加する</span></button><div class="submit-group"><span id="counter" class="counter">0 / 280</span><button id="postButton" class="primary-button post-button" type="submit" disabled><img src="/assets/icons/paper-plane-tilt.svg" alt=""><span>投稿する</span></button></div></div>
+<p id="postError" class="form-error" role="alert"></p><input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+</form></section>
+<p id="visitorNote" class="visitor-note">はるの日々のつぶやき。いいねや絵文字で、そっと気持ちを届けてね。</p>
+<section id="feed" class="feed" aria-label="つぶやき一覧" aria-busy="true"><p class="empty-state">つぶやきを読み込んでいます…</p></section>
+<footer class="page-footer">ひとこと <span>ひとりの言葉に、みんなの気持ち。</span></footer>
+</main>
+<dialog id="loginDialog" class="login-dialog" aria-labelledby="loginTitle"><button class="icon-button dialog-close" id="closeLogin" type="button" aria-label="閉じる"><img src="/assets/icons/x.svg" alt=""></button><img class="login-avatar" src="/assets/avatar.webp" alt="" width="64" height="64"><h2 id="loginTitle">おかえりなさい</h2><p>今日のひとことを、残していきましょう。</p>
+<form id="loginForm"><label for="password">投稿者用パスワード</label><input id="password" name="password" type="password" autocomplete="current-password" required><p id="loginError" class="form-error" role="alert"></p><button class="primary-button" type="submit">ログインする</button></form><p class="login-footnote">読むだけ・リアクションはログイン不要です。</p></dialog>
+<dialog id="imageDialog" class="image-dialog" aria-label="投稿画像を拡大表示"><button id="closeImage" class="icon-button" type="button" aria-label="画像を閉じる"><img src="/assets/icons/x.svg" alt=""></button><img id="expandedImage" alt="投稿された画像"></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><script type="module" src="/app.js"></script>
+</body></html>
