@@ -10,6 +10,7 @@ const icon = name => `<img src="/assets/icons/${name}.svg" alt="">`;
 let posts = [];
 let profile = { name:'とうま', handle:'touma816' };
 let ownerPassword = sessionStorage.getItem('ownerPassword') || '';
+const emailAuth = Boolean(window.hitokotoAuthUser);
 let authenticated = false;
 let visitorView = false;
 let images = [];
@@ -67,7 +68,7 @@ async function loadPosts() {
 function updateOwnerUI() {
   const compose = authenticated && !visitorView;
   $('#composePanel').hidden = !compose; $('#visitorNote').hidden = compose;
-  $('#ownerButton').hidden = authenticated; $('#viewButton').hidden = !authenticated; $('#logoutButton').hidden = !authenticated;
+  $('#ownerButton').hidden = emailAuth || authenticated; $('#viewButton').hidden = !authenticated; $('#logoutButton').hidden = emailAuth || !authenticated;
   $('#viewButton').setAttribute('aria-label', visitorView ? '投稿画面に戻る' : '訪問者の表示を見る');
   $('#viewButton span').textContent = visitorView ? '投稿画面に戻る' : '訪問者の表示を見る';
   renderFeed();
@@ -94,7 +95,7 @@ $('#logoutButton').addEventListener('click', () => {
   images = []; postText.value = ''; renderPreviews(); updateComposer(); updateOwnerUI(); showToast('ログアウトしました');
 });
 $('#profileButton').addEventListener('click', () => {
-  if (!authenticated) { openLogin(); return; }
+  if (!authenticated) { if (emailAuth) showToast('プロフィールは投稿者だけ変更できます'); else openLogin(); return; }
   $('#displayName').value = profile.name; $('#handle').value = profile.handle; $('#profileError').textContent = '';
   profileDialog.showModal(); $('#displayName').focus();
 });
@@ -213,6 +214,7 @@ async function init() {
     try { await unlock(ownerPassword); }
     catch (error) { if (error.status === 401) { ownerPassword = ''; sessionStorage.removeItem('ownerPassword'); } else showToast('ログイン状態を確認できませんでした'); }
   }
-  if (['/owner','/owner.html'].includes(location.pathname) && !authenticated) openLogin();
+  if (!authenticated) updateOwnerUI();
+  if (['/owner','/owner.html'].includes(location.pathname) && !authenticated && !emailAuth) openLogin();
 }
 init();

@@ -4,12 +4,17 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#183b6b"><meta name="description" content="日々のひとことに、気持ちをひとつ。投稿は私だけ、リアクションはみんなから。">
 <title>ひとこと — 今日のひとこと</title><link rel="icon" href="/assets/avatar.webp" type="image/webp"><link rel="stylesheet" href="/styles.css">
 </head>
-<body>
+<body class="auth-pending">
+<section id="authGate" class="auth-gate" aria-labelledby="authTitle">
+<div class="auth-card"><a class="auth-brand" href="/">ひとこと<img src="/assets/icons/sparkle.svg" alt=""></a><img class="auth-avatar" src="/assets/avatar.webp" alt="" width="76" height="76"><h1 id="authTitle">メールで入る</h1><p>メールに届くリンクを開くと、<br>ひとこととリアクションを楽しめます。</p>
+<form id="emailLoginForm"><label for="loginEmail">メールアドレス</label><input id="loginEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required><button class="primary-button" type="submit">ログインリンクを送る</button><p id="authStatus" class="auth-status" role="status" aria-live="polite"></p></form><small>初回はアカウントが自動で作成されます。</small></div>
+</section>
 <a class="skip-link" href="#feed">つぶやきへ移動</a>
 <aside class="sidebar" aria-label="プロフィール">
 <a class="brand" href="/">ひとこと<img class="brand-spark" src="/assets/icons/sparkle.svg" alt=""></a>
 <button id="profileButton" class="profile" type="button" aria-label="プロフィールを変更"><img class="profile-avatar" src="/assets/avatar.webp" alt="とうまのプロフィール画像" width="88" height="88"><strong data-profile-name>とうま</strong><span data-profile-handle>@touma816</span><small class="profile-edit-hint">プロフィールを変更</small></button>
 <div class="sidebar-bottom"><p>日々のかけらを、ここに。<br>気持ちはリアクションで。</p>
+<div id="authIdentity" class="auth-identity" hidden><span id="authEmail"></span><button id="emailLogoutButton" class="sidebar-button" type="button" aria-label="メールアカウントからログアウト"><img src="/assets/icons/sign-out.svg" alt=""><span>メールからログアウト</span></button></div>
 <button id="ownerButton" class="sidebar-button" type="button" aria-label="投稿者ログイン"><img src="/assets/icons/sign-in.svg" alt=""><span>投稿者ログイン</span></button>
 <button id="viewButton" class="sidebar-button" type="button" aria-label="訪問者の表示を見る" hidden><img src="/assets/icons/eye.svg" alt=""><span>訪問者の表示を見る</span></button>
 <button id="logoutButton" class="sidebar-button" type="button" aria-label="ログアウト" hidden><img src="/assets/icons/sign-out.svg" alt=""><span>ログアウト</span></button>
@@ -30,5 +35,5 @@
 <form id="loginForm"><label for="password">投稿者用パスワード</label><input id="password" name="password" type="password" autocomplete="current-password" required><p id="loginError" class="form-error" role="alert"></p><button class="primary-button" type="submit">ログインする</button></form><p class="login-footnote">読むだけ・リアクションはログイン不要です。</p></dialog>
 <dialog id="profileDialog" class="profile-dialog" aria-labelledby="profileTitle"><button class="icon-button dialog-close" id="closeProfile" type="button" aria-label="閉じる"><img src="/assets/icons/x.svg" alt=""></button><img class="login-avatar" src="/assets/avatar.webp" alt="" width="64" height="64"><h2 id="profileTitle">プロフィールを変更</h2><p>タイムラインに表示する名前を設定できます。</p><form id="profileForm"><label for="displayName">表示名</label><input id="displayName" name="displayName" maxlength="30" autocomplete="name" required><label for="handle">ユーザー名</label><div class="handle-input"><span>@</span><input id="handle" name="handle" maxlength="30" pattern="[A-Za-z0-9_]+" required></div><p id="profileError" class="form-error" role="alert"></p><button class="primary-button" type="submit">保存する</button></form></dialog>
 <dialog id="imageDialog" class="image-dialog" aria-label="投稿画像を拡大表示"><button id="closeImage" class="icon-button" type="button" aria-label="画像を閉じる"><img src="/assets/icons/x.svg" alt=""></button><img id="expandedImage" alt="投稿された画像"></dialog>
-<div id="toast" class="toast" role="status" aria-live="polite"></div><script type="module" src="/app.js"></script>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><script type="module" src="/auth.js"></script>
 </body></html>

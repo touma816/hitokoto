@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "checks": [
+    "signed-out gate",
+    "magic-link request",
+    "owner recognition",
+    "owner composer",
+    "visitor read-only view",
+    "visitor reaction",
+    "mobile overflow"
+  ],
+  "consoleErrors": []
+}

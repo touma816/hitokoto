@@ -2,6 +2,19 @@
 
 final result: passed
 
+## Email authentication update
+
+- Source requirement: replace the ChatGPT access screen with email-address login and identify each visitor by email.
+- Browser-rendered evidence: `qa/email-login.png` (990 × 604), `qa/email-owner.png` (990 × 604), and `qa/email-visitor.png` (390 × 844), all at deviceScaleFactor 1.
+- Full-view combined comparison: `qa/email-auth-comparison.png`, containing the signed-out login screen, owner timeline and mobile visitor timeline after implementation. The login card uses the existing navy, blue botanical art, rounded type and avatar, so it reads as part of the same product.
+- Focused review: the login form label, email field, focus ring, primary action, success message and mobile logout control were checked at readable size; no additional crop was needed.
+- [P1, resolved] Hosting previously required a ChatGPT account. The app now starts behind a Supabase email magic-link gate and loads the timeline only after a valid session.
+- [P1, resolved] Visitor identity used an anonymous browser UUID. It now uses the authenticated Supabase user ID; Supabase Authentication records the corresponding email address.
+- [P1, resolved] A signed-in visitor could have encountered the old owner-password entry point. Email-authenticated visitors now see a read-only timeline and reactions, while the hashed owner-email match enables posting controls.
+- Typography, spacing, blue color tokens, raster assets and Japanese copy were checked in all three captures. No actionable P0/P1/P2 findings remain.
+- Primary interactions tested: signed-out gate, magic-link request, owner recognition, owner composer, visitor read-only view, visitor reaction and mobile overflow.
+- Console errors checked: none. Results: `qa/email-auth-results.json`.
+
 ## Target and evidence
 
 - Source visual truth: the four annotated 990 × 604 browser screenshots supplied by the user, backed by the previous owner-state capture `qa/desktop-owner-final.png`.
