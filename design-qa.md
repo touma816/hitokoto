@@ -23,6 +23,14 @@ final result: passed
 - JPEG, PNG and WebP files are center-cropped to a 512 × 512 WebP. The saved icon updates the sidebar, composer, post bylines and favicon and persists after reload.
 - API validation rejects remote URLs and invalid image payloads. No actionable P0/P1/P2 findings remain.
 
+## Login method update
+
+- Source requirement: allow email/password, Discord and GitHub sign-in instead of email magic links.
+- The login view now has email/password sign-in and sign-up actions plus Discord and GitHub OAuth actions.
+- Email registration uses Supabase password sign-up; if Supabase requires email confirmation, confirmation is only needed during registration. Returning users sign in with their password.
+- Discord and GitHub OAuth calls request email scopes so the authenticated email can be checked against the owner email policy. Supabase provider Client ID/Secret setup is required before those OAuth buttons can complete sign-in.
+- Static code syntax was checked. Provider flows still require live OAuth credentials for end-to-end verification.
+
 ## Target and evidence
 
 - Source visual truth: the four annotated 990 × 604 browser screenshots supplied by the user, backed by the previous owner-state capture `qa/desktop-owner-final.png`.

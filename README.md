@@ -2,7 +2,7 @@
 
 自分だけが投稿し、訪問者はいいね・絵文字でリアクションできる個人用タイムラインです。コメント機能はありません。
 
-公開版はSupabaseのメール・マジックリンク認証を使います。訪問者はメールアドレスごとのSupabaseユーザーIDで識別され、登録メールはSupabase Dashboardの「Authentication → Users」で確認できます。
+公開版はSupabase認証を使います。メールアドレスとパスワード、Discord、GitHubをログイン方法として選べます。訪問者はSupabaseユーザーIDで識別されます。
 
 訪問者用URLは `https://hitokoto-touma816.basicoak.chatgpt.site/?view=visitor` です。投稿者画面の「訪問者URLをコピー」からも取得できます。
 
@@ -23,11 +23,17 @@ npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
 - アイコン、表示名、ユーザー名を投稿者画面から変更できます。
 - 画像のプレビュー・取り消し・拡大表示。JPEG / PNG / WebP / GIF対応。大きな静止画は送信前に1600px以内へ縮小されます。
 - ログイン後に使えるいいねと19種類の絵文字。訪問者ごとに追加・取り消しできます。
-- メールに届くマジックリンクでログインし、訪問者をメールアドレス単位で識別します。
+- メールアドレスとパスワード、Discord、GitHubのアカウントでログインできます。
 - 投稿者だけが投稿・削除でき、訪問者向け表示への切り替えも可能です。
 - PC・タブレット・スマートフォン対応。
 
 投稿・画像・リアクションは `data/posts.json` に保存されます（Git管理対象外）。初回はサンプル投稿が表示されます。実際の投稿やリアクションを行うと保存されます。保存先は `DATA_FILE` で変更できます。現在はローカルプレビュー用の単一Nodeプロセス構成です。
+
+## Supabase認証プロバイダーの設定
+
+Supabase Dashboardの **Authentication → Providers** でEmail、Discord、GitHubを有効にします。Discord・GitHubは各Developer PortalでOAuthアプリを作り、Callback URLに `https://ystlgxxqbuchwenyifwg.supabase.co/auth/v1/callback` を登録してから、Client IDとSecretをSupabaseへ設定してください。ソーシャルログインはProvider設定を保存した後に使用できます。Email認証で確認メールを有効にしている場合、新規登録時だけ確認操作が必要です。投稿者はSQL設定で指定したメールアドレスが認証プロバイダーから返されるアカウントでログインします。
+
+Supabase Dashboardの **Authentication → URL Configuration** には、Site URLとして `https://hitokoto-touma816.basicoak.chatgpt.site` を設定し、Redirect URLsに `https://hitokoto-touma816.basicoak.chatgpt.site/**` を追加してください。
 
 ## Supabaseの共有保存とリアルタイム更新
 

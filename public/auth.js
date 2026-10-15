@@ -39,17 +39,45 @@ async function enter(session) {
   await import('/app.js');
 }
 
+const email = () => document.querySelector('#loginEmail').value.trim();
+const password = () => document.querySelector('#loginPassword').value;
+const redirectUrl = () => `${location.origin}${location.pathname}${location.search}`;
+function showAuthError(error) {
+  status.className = 'auth-status error';
+  status.textContent = error?.message || 'ログインできませんでした。入力内容と認証設定を確認してください。';
+}
+
 form.addEventListener('submit', async event => {
   event.preventDefault();
   const button = event.submitter;
-  const email = document.querySelector('#loginEmail').value.trim();
   button.disabled = true; status.className = 'auth-status'; status.textContent = '送信しています…';
-  const emailRedirectTo = `${location.origin}${location.pathname}${location.search}`;
-  const {error} = await client.auth.signInWithOtp({email,options:{emailRedirectTo}});
-  if (error) { status.className = 'auth-status error'; status.textContent = error.message || 'メールを送信できませんでした'; }
-  else { status.className = 'auth-status success'; status.textContent = 'ログインリンクを送りました。メールを確認してください。'; }
+  const {data,error} = await client.auth.signInWithPassword({email:email(),password:password()});
+  if (error) showAuthError(error);
+  else await enter(data.session);
   button.disabled = false;
 });
+
+document.querySelector('#emailSignupButton').addEventListener('click', async event => {
+  const button = event.currentTarget;
+  if (!form.reportValidity()) return;
+  button.disabled = true; status.className = 'auth-status'; status.textContent = 'アカウントを作成しています…';
+  const {data,error} = await client.auth.signUp({email:email(),password:password(),options:{emailRedirectTo:redirectUrl()}});
+  if (error) showAuthError(error);
+  else if (data.session) await enter(data.session);
+  else { status.className = 'auth-status success'; status.textContent = '確認メールを送りました。確認後、登録したパスワードでログインしてください。'; }
+  button.disabled = false;
+});
+
+for (const [id,provider,scopes] of [
+  ['discordLoginButton','discord','identify email'],
+  ['githubLoginButton','github','read:user user:email']
+]) {
+  document.querySelector(`#${id}`).addEventListener('click', async event => {
+    event.currentTarget.disabled = true; status.className = 'auth-status'; status.textContent = `${provider === 'discord' ? 'Discord' : 'GitHub'}へ接続しています…`;
+    const {error} = await client.auth.signInWithOAuth({provider,options:{redirectTo:redirectUrl(),scopes}});
+    if (error) { showAuthError(error); event.currentTarget.disabled = false; }
+  });
+}
 
 client.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) enter(session);

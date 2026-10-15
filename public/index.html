@@ -6,8 +6,8 @@
 </head>
 <body class="auth-pending">
 <section id="authGate" class="auth-gate" aria-labelledby="authTitle">
-<div class="auth-card"><a class="auth-brand" href="/">ひとこと<img src="/assets/icons/sparkle.svg" alt=""></a><img class="auth-avatar" src="/assets/avatar.webp" alt="" width="76" height="76"><h1 id="authTitle">メールで入る</h1><p>メールに届くリンクを開くと、<br>ひとこととリアクションを楽しめます。</p>
-<form id="emailLoginForm"><label for="loginEmail">メールアドレス</label><input id="loginEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required><button class="primary-button" type="submit">ログインリンクを送る</button><p id="authStatus" class="auth-status" role="status" aria-live="polite"></p></form><small>初回はアカウントが自動で作成されます。</small></div>
+<div class="auth-card"><a class="auth-brand" href="/">ひとこと<img src="/assets/icons/sparkle.svg" alt=""></a><img class="auth-avatar" src="/assets/avatar.webp" alt="" width="76" height="76"><h1 id="authTitle">ログイン</h1><p>メールアドレス、Discord、GitHubから<br>ログインできます。</p>
+<form id="emailLoginForm"><label for="loginEmail">メールアドレス</label><input id="loginEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required><label for="loginPassword">パスワード</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" minlength="6" placeholder="6文字以上" required><div class="email-auth-actions"><button class="primary-button" type="submit">ログイン</button><button id="emailSignupButton" class="secondary-auth-button" type="button">新規登録</button></div><p id="authStatus" class="auth-status" role="status" aria-live="polite"></p></form><div class="auth-divider"><span>または</span></div><div class="oauth-actions"><button id="discordLoginButton" class="oauth-button" type="button"><span aria-hidden="true">DC</span>Discordでログイン</button><button id="githubLoginButton" class="oauth-button" type="button"><span aria-hidden="true">GH</span>GitHubでログイン</button></div><small>新規登録では、Supabaseの設定によりメール確認が必要な場合があります。</small></div>
 </section>
 <a class="skip-link" href="#feed">つぶやきへ移動</a>
 <aside class="sidebar" aria-label="プロフィール">
