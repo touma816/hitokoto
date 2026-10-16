@@ -64,7 +64,7 @@ client.auth.onAuthStateChange((event, session) => {
 
 (async () => {
   document.querySelector('#authTitle').textContent = 'Discordでログイン';
-  document.querySelector('#authDescription').textContent = '投稿者はつぶやきを投稿でき、訪問者はリアクションできます。';
+  document.querySelector('#authDescription').textContent = 'Discordアカウントでログインしてください。';
   const {data,error} = await client.auth.getSession();
   if (data.session) return enter(data.session);
   if (error) { status.className = 'auth-status error'; status.textContent = error.message || 'ログインを確認できませんでした'; }
