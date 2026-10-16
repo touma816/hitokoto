@@ -25,10 +25,9 @@ final result: passed
 
 ## Login method update
 
-- Source requirement: use Discord or GitHub for both owner and visitor login; remove email/password login.
-- The login gate now offers only Discord and GitHub OAuth. Visitor links identify themselves as visitor login and keep the visitor-only view after OAuth redirects.
-- The authenticated provider email continues to identify the owner; other authenticated users can react but cannot post or edit the profile.
-- OAuth calls request email scopes so Supabase returns the email used by the owner policy.
+- Source requirement: use Discord only for both owner and visitor login; remove email/password and GitHub login.
+- The login gate offers only Discord OAuth. Visitor links identify themselves as visitor login and keep the visitor-only view after OAuth redirects.
+- The authenticated Discord email continues to identify the owner; other authenticated users can react but cannot post or edit the profile.
 
 ## Target and evidence
 

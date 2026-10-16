@@ -2,7 +2,7 @@
 
 自分だけが投稿し、訪問者はいいね・絵文字でリアクションできる個人用タイムラインです。コメント機能はありません。
 
-公開版はSupabase認証を使います。ログイン方法はDiscordまたはGitHubです。訪問者はSupabaseユーザーIDで識別されます。
+公開版はSupabase認証を使います。ログイン方法はDiscordのみです。訪問者はSupabaseユーザーIDで識別されます。
 
 訪問者用URLは `https://hitokoto-touma816.basicoak.chatgpt.site/?view=visitor` です。投稿者画面の「訪問者URLをコピー」からも取得できます。
 
@@ -23,7 +23,7 @@ npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
 - アイコン、表示名、ユーザー名を投稿者画面から変更できます。
 - 画像のプレビュー・取り消し・拡大表示。JPEG / PNG / WebP / GIF対応。大きな静止画は送信前に1600px以内へ縮小されます。
 - ログイン後に使えるいいねと19種類の絵文字。訪問者ごとに追加・取り消しできます。
-- DiscordまたはGitHubのアカウントでログインできます。投稿者は投稿、訪問者はリアクションのみ行えます。
+- Discordアカウントでログインできます。投稿者は投稿、訪問者はリアクションのみ行えます。
 - 投稿者だけが投稿・削除でき、訪問者向け表示への切り替えも可能です。
 - PC・タブレット・スマートフォン対応。
 
@@ -31,13 +31,13 @@ npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
 
 ## Supabase認証プロバイダーの設定
 
-Supabase Dashboardの **Authentication → Providers** でDiscordとGitHubを有効にします。各Developer PortalでOAuthアプリを作り、Callback URLに `https://ystlgxxqbuchwenyifwg.supabase.co/auth/v1/callback` を登録してから、Client IDとSecretをSupabaseへ設定してください。投稿者はSQLで指定したメールアドレスがDiscordまたはGitHubから返されるアカウントでログインします。メールアドレスは投稿者の識別に使われますが、メールアドレスとパスワードによるログインは提供しません。
+Supabase Dashboardの **Authentication → Providers** でDiscordを有効にします。Discord Developer PortalでOAuthアプリを作り、Redirect URLに `https://ystlgxxqbuchwenyifwg.supabase.co/auth/v1/callback` を登録してから、Client IDとSecretをSupabaseへ設定してください。投稿者はSQLで指定したメールアドレスがDiscordから返されるアカウントでログインします。メールアドレスは投稿者の識別に使われますが、メールアドレスとパスワードによるログインは提供しません。
 
 Supabase Dashboardの **Authentication → URL Configuration** には、Site URLとして `https://hitokoto-touma816.basicoak.chatgpt.site` を設定し、Redirect URLsに `https://hitokoto-touma816.basicoak.chatgpt.site/**` を追加してください。
 
 ## Supabaseの共有保存とリアルタイム更新
 
-公開版で投稿を全訪問者へ共有し、投稿・リアクションを即時反映するには、Supabase Dashboardの「SQL Editor」で [`supabase/setup.sql`](supabase/setup.sql) を実行します。実行前に `YOUR_OWNER_EMAIL@example.com` を投稿者のDiscordまたはGitHubアカウントから返されるメールアドレスへ変更してください。
+公開版で投稿を全訪問者へ共有し、投稿・リアクションを即時反映するには、Supabase Dashboardの「SQL Editor」で [`supabase/setup.sql`](supabase/setup.sql) を実行します。実行前に `YOUR_OWNER_EMAIL@example.com` を投稿者のDiscordアカウントから返されるメールアドレスへ変更してください。
 
 設定後は投稿・プロフィール・リアクションをSupabaseへ保存し、Realtimeで開いている画面へ反映します。テーブルが未設定の間は、壊れた画面を出さないためブラウザ内保存へ自動的に切り替わります。Sites用のAPIアダプターは [`deployment/preview-api.js`](deployment/preview-api.js) にあります。
 

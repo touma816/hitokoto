@@ -45,8 +45,7 @@ function showAuthError(error) {
 }
 
 for (const [id,provider,scopes] of [
-  ['discordLoginButton','discord','identify email'],
-  ['githubLoginButton','github','read:user user:email']
+  ['discordLoginButton','discord','identify email']
 ]) {
   document.querySelector(`#${id}`).addEventListener('click', async event => {
     const button = event.currentTarget;
@@ -70,8 +69,8 @@ client.auth.onAuthStateChange((event, session) => {
   const visitorOnly = new URLSearchParams(location.search).get('view') === 'visitor';
   document.querySelector('#authTitle').textContent = visitorOnly ? '訪問者ログイン' : '投稿者ログイン';
   document.querySelector('#authDescription').textContent = visitorOnly
-    ? 'DiscordまたはGitHubでログインして、ひとことにリアクションできます。'
-    : '登録済みのDiscordまたはGitHubアカウントでログインしてください。';
+    ? 'Discordでログインして、ひとことにリアクションできます。'
+    : 'Discordアカウントでログインしてください。';
   const {data,error} = await client.auth.getSession();
   if (data.session) return enter(data.session);
   if (error) { status.className = 'auth-status error'; status.textContent = error.message || 'ログインを確認できませんでした'; }
