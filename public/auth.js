@@ -18,7 +18,7 @@ async function enter(session) {
     return;
   }
   entered = true;
-  window.hitokotoAuthUser = {id:user.id,email:user.email};
+  window.hitokotoAuthUser = {id:user.id};
   window.hitokotoAuthIsOwner = isOwner === true;
   window.hitokotoSupabaseSession = session;
   if (window.hitokotoAuthIsOwner) sessionStorage.setItem('ownerPassword', 'private-preview');
@@ -26,7 +26,7 @@ async function enter(session) {
   gate.hidden = true;
   document.body.classList.remove('auth-pending');
   document.querySelector('#authIdentity').hidden = false;
-  document.querySelector('#authEmail').textContent = user.email;
+  document.querySelector('#authEmail').textContent = 'Discordでログイン中';
   document.querySelector('#oauthLogoutButton').addEventListener('click', async () => {
     await client.auth.signOut();
     sessionStorage.removeItem('ownerPassword');
