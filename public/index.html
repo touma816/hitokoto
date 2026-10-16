@@ -6,15 +6,15 @@
 </head>
 <body class="auth-pending">
 <section id="authGate" class="auth-gate" aria-labelledby="authTitle">
-<div class="auth-card"><a class="auth-brand" href="/">ひとこと<img src="/assets/icons/sparkle.svg" alt=""></a><img class="auth-avatar" src="/assets/avatar.webp" alt="" width="76" height="76"><h1 id="authTitle">ログイン</h1><p>メールアドレス、Discord、GitHubから<br>ログインできます。</p>
-<form id="emailLoginForm"><label for="loginEmail">メールアドレス</label><input id="loginEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required><label for="loginPassword">パスワード</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" minlength="6" placeholder="6文字以上" required><div class="email-auth-actions"><button class="primary-button" type="submit">ログイン</button><button id="emailSignupButton" class="secondary-auth-button" type="button">新規登録</button></div><p id="authStatus" class="auth-status" role="status" aria-live="polite"></p></form><div class="auth-divider"><span>または</span></div><div class="oauth-actions"><button id="discordLoginButton" class="oauth-button" type="button"><span aria-hidden="true">DC</span>Discordでログイン</button><button id="githubLoginButton" class="oauth-button" type="button"><span aria-hidden="true">GH</span>GitHubでログイン</button></div><small>新規登録では、Supabaseの設定によりメール確認が必要な場合があります。</small></div>
+<div class="auth-card"><a class="auth-brand" href="/">ひとこと<img src="/assets/icons/sparkle.svg" alt=""></a><img class="auth-avatar" src="/assets/avatar.webp" alt="" width="76" height="76"><h1 id="authTitle">ログイン</h1><p id="authDescription">GitHubまたはDiscordでログインできます。</p>
+<p id="authStatus" class="auth-status" role="status" aria-live="polite"></p><div class="oauth-actions"><button id="discordLoginButton" class="oauth-button" type="button"><span aria-hidden="true">DC</span>Discordでログイン</button><button id="githubLoginButton" class="oauth-button" type="button"><span aria-hidden="true">GH</span>GitHubでログイン</button></div></div>
 </section>
 <a class="skip-link" href="#feed">つぶやきへ移動</a>
 <aside class="sidebar" aria-label="プロフィール">
 <a class="brand" href="/">ひとこと<img class="brand-spark" src="/assets/icons/sparkle.svg" alt=""></a>
 <button id="profileButton" class="profile" type="button" aria-label="プロフィールを変更"><img class="profile-avatar" data-profile-avatar src="/assets/avatar.webp" alt="とうまのプロフィール画像" width="88" height="88"><strong data-profile-name>とうま</strong><span data-profile-handle>@touma816</span><small class="profile-edit-hint">プロフィールを変更</small></button>
 <div class="sidebar-bottom"><p>日々のかけらを、ここに。<br>気持ちはリアクションで。</p>
-<div id="authIdentity" class="auth-identity" hidden><span id="authEmail"></span><button id="emailLogoutButton" class="sidebar-button" type="button" aria-label="メールアカウントからログアウト"><img src="/assets/icons/sign-out.svg" alt=""><span>メールからログアウト</span></button></div>
+<div id="authIdentity" class="auth-identity" hidden><span id="authEmail"></span><button id="oauthLogoutButton" class="sidebar-button" type="button" aria-label="ログアウト"><img src="/assets/icons/sign-out.svg" alt=""><span>ログアウト</span></button></div>
 <button id="ownerButton" class="sidebar-button" type="button" aria-label="投稿者ログイン"><img src="/assets/icons/sign-in.svg" alt=""><span>投稿者ログイン</span></button>
 <button id="copyVisitorUrlButton" class="sidebar-button" type="button" aria-label="訪問者用URLをコピー" hidden><img src="/assets/icons/eye.svg" alt=""><span>訪問者URLをコピー</span></button>
 <button id="viewButton" class="sidebar-button" type="button" aria-label="訪問者の表示を見る" hidden><img src="/assets/icons/eye.svg" alt=""><span>訪問者の表示を見る</span></button>

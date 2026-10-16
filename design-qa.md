@@ -25,11 +25,10 @@ final result: passed
 
 ## Login method update
 
-- Source requirement: allow email/password, Discord and GitHub sign-in instead of email magic links.
-- The login view now has email/password sign-in and sign-up actions plus Discord and GitHub OAuth actions.
-- Email registration uses Supabase password sign-up; if Supabase requires email confirmation, confirmation is only needed during registration. Returning users sign in with their password.
-- Discord and GitHub OAuth calls request email scopes so the authenticated email can be checked against the owner email policy. Supabase provider Client ID/Secret setup is required before those OAuth buttons can complete sign-in.
-- Static code syntax was checked. Provider flows still require live OAuth credentials for end-to-end verification.
+- Source requirement: use Discord or GitHub for both owner and visitor login; remove email/password login.
+- The login gate now offers only Discord and GitHub OAuth. Visitor links identify themselves as visitor login and keep the visitor-only view after OAuth redirects.
+- The authenticated provider email continues to identify the owner; other authenticated users can react but cannot post or edit the profile.
+- OAuth calls request email scopes so Supabase returns the email used by the owner policy.
 
 ## Target and evidence
 
