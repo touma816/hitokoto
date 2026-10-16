@@ -12,9 +12,8 @@ let profile = { name:'とうま', handle:'touma816', avatar:'/assets/avatar.webp
 let profileAvatarDraft = profile.avatar;
 let ownerPassword = sessionStorage.getItem('ownerPassword') || '';
 const emailAuth = Boolean(window.hitokotoAuthUser);
-const visitorOnly = new URLSearchParams(location.search).get('view') === 'visitor';
 let authenticated = false;
-let visitorView = visitorOnly;
+let visitorView = false;
 let images = [];
 let processing = false;
 let submitting = false;
@@ -72,7 +71,7 @@ async function loadPosts() {
 function updateOwnerUI() {
   const compose = authenticated && !visitorView;
   $('#composePanel').hidden = !compose; $('#visitorNote').hidden = compose;
-  $('#ownerButton').hidden = emailAuth || authenticated; $('#copyVisitorUrlButton').hidden = !authenticated; $('#viewButton').hidden = !authenticated || visitorOnly; $('#logoutButton').hidden = emailAuth || !authenticated;
+  $('#ownerButton').hidden = emailAuth; $('#copyVisitorUrlButton').hidden = true; $('#viewButton').hidden = !window.hitokotoAuthIsOwner; $('#logoutButton').hidden = true;
   $('#viewButton').setAttribute('aria-label', visitorView ? '投稿画面に戻る' : '訪問者の表示を見る');
   $('#viewButton span').textContent = visitorView ? '投稿画面に戻る' : '訪問者の表示を見る';
   renderFeed();
@@ -81,7 +80,7 @@ function openLogin() { $('#loginError').textContent = ''; loginDialog.showModal(
 async function unlock(password) {
   ownerPassword = password;
   await request('/api/owner/check', { method:'POST' }, true);
-  authenticated = true; visitorView = visitorOnly;
+  authenticated = true; visitorView = false;
   sessionStorage.setItem('ownerPassword', ownerPassword);
   updateOwnerUI(); loginDialog.close(); $('#password').value = ''; postText.focus();
 }

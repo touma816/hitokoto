@@ -1,6 +1,5 @@
 const SUPABASE_URL = 'https://ystlgxxqbuchwenyifwg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_EZ_0KpOk5s7h9PQTRRB-sA_vCrzR5dv';
-const OWNER_EMAIL_HASH = '7aedd7557c036e98ef23918e877a2b8734a6ff77df7806166e7abc5c4ad9c4e7';
 const gate = document.querySelector('#authGate');
 const status = document.querySelector('#authStatus');
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -9,22 +8,20 @@ const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 window.hitokotoSupabase = client;
 let entered = false;
 
-async function sha256(value) {
-  const bytes = new TextEncoder().encode(value.trim().toLowerCase());
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
-}
-
 async function enter(session) {
   if (entered || !session?.user) return;
-  entered = true;
   const user = session.user;
-  const isOwner = await sha256(user.email || '') === OWNER_EMAIL_HASH;
+  const {data:isOwner,error} = await client.rpc('is_site_owner');
+  if (error) {
+    status.className = 'auth-status error';
+    status.textContent = '投稿者の判定に失敗しました。Supabaseの setup.sql が実行済みか確認してください。';
+    return;
+  }
+  entered = true;
   window.hitokotoAuthUser = {id:user.id,email:user.email};
-  window.hitokotoAuthIsOwner = isOwner;
+  window.hitokotoAuthIsOwner = isOwner === true;
   window.hitokotoSupabaseSession = session;
-  localStorage.setItem('hitokoto-private-preview-visitor', user.id);
-  if (isOwner) sessionStorage.setItem('ownerPassword', 'private-preview');
+  if (window.hitokotoAuthIsOwner) sessionStorage.setItem('ownerPassword', 'private-preview');
   else sessionStorage.removeItem('ownerPassword');
   gate.hidden = true;
   document.body.classList.remove('auth-pending');
@@ -66,11 +63,8 @@ client.auth.onAuthStateChange((event, session) => {
 });
 
 (async () => {
-  const visitorOnly = new URLSearchParams(location.search).get('view') === 'visitor';
-  document.querySelector('#authTitle').textContent = visitorOnly ? '訪問者ログイン' : '投稿者ログイン';
-  document.querySelector('#authDescription').textContent = visitorOnly
-    ? 'Discordでログインして、ひとことにリアクションできます。'
-    : 'Discordアカウントでログインしてください。';
+  document.querySelector('#authTitle').textContent = 'Discordでログイン';
+  document.querySelector('#authDescription').textContent = '投稿者はつぶやきを投稿でき、訪問者はリアクションできます。';
   const {data,error} = await client.auth.getSession();
   if (data.session) return enter(data.session);
   if (error) { status.className = 'auth-status error'; status.textContent = error.message || 'ログインを確認できませんでした'; }

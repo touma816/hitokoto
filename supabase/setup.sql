@@ -1,4 +1,5 @@
--- 1行だけ、自分がSupabaseログインに使うメールアドレスへ変更してから実行してください。
+-- Discord OAuthでSupabaseが返す投稿者メールアドレスを設定してください。
+-- このSQLは再実行できます。DiscordのClient Secretなどはここへ書かないでください。
 create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
 
@@ -7,7 +8,7 @@ create table if not exists private.site_config (
   owner_email text not null
 );
 insert into private.site_config (id, owner_email)
-values (true, 'YOUR_OWNER_EMAIL@example.com')
+values (true, 'kd1407863@st.kobedenshi.ac.jp')
 on conflict (id) do update set owner_email = excluded.owner_email;
 
 create or replace function public.is_site_owner()
@@ -17,7 +18,10 @@ stable
 security definer
 set search_path = ''
 as $$
-  select coalesce(lower(auth.jwt() ->> 'email') = lower((select owner_email from private.site_config where id = true)), false)
+  select coalesce(
+    lower(btrim(auth.jwt() ->> 'email')) = lower(btrim((select owner_email from private.site_config where id = true))),
+    false
+  )
 $$;
 revoke all on function public.is_site_owner() from public, anon;
 grant execute on function public.is_site_owner() to authenticated;
