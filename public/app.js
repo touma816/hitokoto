@@ -13,7 +13,6 @@ let profileAvatarDraft = profile.avatar;
 let ownerPassword = sessionStorage.getItem('ownerPassword') || '';
 const emailAuth = Boolean(window.hitokotoAuthUser);
 let authenticated = false;
-let visitorView = false;
 let images = [];
 let processing = false;
 let submitting = false;
@@ -56,7 +55,7 @@ function reactionMarkup(post) {
   return groups.map(item => `<button class="reaction" type="button" data-emoji="${item.emoji}" aria-label="${item.emoji} ${emojiNames[item.emoji] || 'リアクション'} ${item.count}件${item.reacted ? '、取り消す' : ''}" aria-pressed="${item.reacted}"><span class="reaction-emoji">${item.emoji}</span><span>${item.count}</span></button>`).join('') + `<button class="reaction-add" type="button" aria-label="絵文字でリアクション" aria-expanded="false" aria-controls="picker-${escapeHtml(post.id)}">${icon('plus')}</button>`;
 }
 function postMarkup(post) {
-  return `<article class="post" data-id="${escapeHtml(post.id)}"><img class="avatar" src="${escapeHtml(profile.avatar)}" alt="" width="64" height="64"><div class="post-main"><div class="post-byline"><strong>${escapeHtml(profile.name)}</strong><span class="post-handle">@${escapeHtml(profile.handle)}</span><span class="post-separator">·</span><time class="post-time" datetime="${escapeHtml(post.createdAt)}" title="${escapeHtml(new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',dateStyle:'long',timeStyle:'short'}).format(new Date(post.createdAt)))}">${relativeTime(post.createdAt)}</time>${authenticated && !visitorView ? `<button class="delete-button" type="button" aria-label="この投稿を削除">${icon('trash')}</button>` : ''}</div>${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ''}${post.images.length ? `<div class="post-images${post.images.length > 1 ? ' multiple' : ''}">${post.images.map((image, index) => `<button class="photo-button" type="button" data-image="${index}" aria-label="投稿画像${index + 1}を拡大"><img src="${escapeHtml(image)}" alt="${escapeHtml(profile.name)}の投稿画像 ${index + 1}" loading="lazy"></button>`).join('')}</div>` : ''}<div class="reaction-bar">${reactionMarkup(post)}</div></div></article>`;
+  return `<article class="post" data-id="${escapeHtml(post.id)}"><img class="avatar" src="${escapeHtml(profile.avatar)}" alt="" width="64" height="64"><div class="post-main"><div class="post-byline"><strong>${escapeHtml(profile.name)}</strong><span class="post-handle">@${escapeHtml(profile.handle)}</span><span class="post-separator">·</span><time class="post-time" datetime="${escapeHtml(post.createdAt)}" title="${escapeHtml(new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',dateStyle:'long',timeStyle:'short'}).format(new Date(post.createdAt)))}">${relativeTime(post.createdAt)}</time>${authenticated ? `<button class="delete-button" type="button" aria-label="この投稿を削除">${icon('trash')}</button>` : ''}</div>${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ''}${post.images.length ? `<div class="post-images${post.images.length > 1 ? ' multiple' : ''}">${post.images.map((image, index) => `<button class="photo-button" type="button" data-image="${index}" aria-label="投稿画像${index + 1}を拡大"><img src="${escapeHtml(image)}" alt="${escapeHtml(profile.name)}の投稿画像 ${index + 1}" loading="lazy"></button>`).join('')}</div>` : ''}<div class="reaction-bar">${reactionMarkup(post)}</div></div></article>`;
 }
 function renderFeed() {
   closePicker(false);
@@ -69,38 +68,26 @@ async function loadPosts() {
   finally { feed.setAttribute('aria-busy', 'false'); }
 }
 function updateOwnerUI() {
-  const compose = authenticated && !visitorView;
+  const compose = authenticated;
   $('#composePanel').hidden = !compose; $('#visitorNote').hidden = compose;
-  $('#ownerButton').hidden = emailAuth; $('#copyVisitorUrlButton').hidden = true; $('#viewButton').hidden = !window.hitokotoAuthIsOwner; $('#logoutButton').hidden = true;
-  $('#viewButton').setAttribute('aria-label', visitorView ? '投稿画面に戻る' : '訪問者の表示を見る');
-  $('#viewButton span').textContent = visitorView ? '投稿画面に戻る' : '訪問者の表示を見る';
+  $('#ownerButton').hidden = emailAuth;
   renderFeed();
 }
 function openLogin() { $('#loginError').textContent = ''; loginDialog.showModal(); $('#password').focus(); }
 async function unlock(password) {
   ownerPassword = password;
   await request('/api/owner/check', { method:'POST' }, true);
-  authenticated = true; visitorView = false;
+  authenticated = true;
   sessionStorage.setItem('ownerPassword', ownerPassword);
   updateOwnerUI(); loginDialog.close(); $('#password').value = ''; postText.focus();
 }
 $('#ownerButton').addEventListener('click', openLogin);
-$('#copyVisitorUrlButton').addEventListener('click', async () => {
-  const url = new URL(location.href); url.search = ''; url.hash = ''; url.searchParams.set('view','visitor');
-  try { await navigator.clipboard.writeText(url.href); showToast('訪問者用URLをコピーしました'); }
-  catch { showToast(url.href); }
-});
 $('#closeLogin').addEventListener('click', () => loginDialog.close());
 $('#loginForm').addEventListener('submit', async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true; $('#loginError').textContent = '';
   try { await unlock($('#password').value); }
   catch (error) { $('#loginError').textContent = error.message; ownerPassword = ''; }
   finally { button.disabled = false; }
-});
-$('#viewButton').addEventListener('click', () => { visitorView = !visitorView; updateOwnerUI(); });
-$('#logoutButton').addEventListener('click', () => {
-  authenticated = false; ownerPassword = ''; visitorView = false; sessionStorage.removeItem('ownerPassword');
-  images = []; postText.value = ''; renderPreviews(); updateComposer(); updateOwnerUI(); showToast('ログアウトしました');
 });
 $('#profileButton').addEventListener('click', () => {
   if (!authenticated) { if (emailAuth) showToast('プロフィールは投稿者だけ変更できます'); else openLogin(); return; }
