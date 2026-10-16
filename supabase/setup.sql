@@ -1,4 +1,4 @@
--- Discord OAuthでSupabaseが返す投稿者メールアドレスを設定してください。
+-- 投稿者判定にはDiscord OAuthでSupabaseが受け取るメールアドレスを使います。
 -- このSQLは再実行できます。DiscordのClient Secretなどはここへ書かないでください。
 create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
@@ -8,7 +8,7 @@ create table if not exists private.site_config (
   owner_email text not null
 );
 insert into private.site_config (id, owner_email)
-values (true, 'kd1407863@st.kobedenshi.ac.jp')
+values (true, 'kobatou0816@gmail.com')
 on conflict (id) do update set owner_email = excluded.owner_email;
 
 create or replace function public.is_site_owner()
@@ -34,8 +34,10 @@ create table if not exists public.site_profile (
   updated_at timestamptz not null default now()
 );
 insert into public.site_profile (id, name, handle)
-values (true, 'とうま', 'touma816')
-on conflict (id) do nothing;
+values (true, '桐慎', 'touma816')
+on conflict (id) do update
+set name = excluded.name,
+    updated_at = now();
 
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),

@@ -35,7 +35,7 @@ Supabase Dashboardの **Authentication → URL Configuration** には、Site URL
 
 ## Supabaseの共有保存とリアルタイム更新
 
-公開版で投稿を全訪問者へ共有し、投稿・リアクションを即時反映するには、Supabase Dashboardの「SQL Editor」で [`supabase/setup.sql`](supabase/setup.sql) 全体を実行します。ファイル冒頭の `owner_email` を、投稿者として使うDiscordアカウントからSupabaseが受け取るメールアドレスに合わせてください。訪問者のアカウントはこの値に一致しない限り、訪問者として扱われます。ログイン後の画面上の判定も同じ `is_site_owner()` 関数を使うため、URLやフロントエンドの別設定は不要です。
+公開版で投稿を全訪問者へ共有し、投稿・リアクションを即時反映するには、Supabase Dashboardの「SQL Editor」で [`supabase/setup.sql`](supabase/setup.sql) 全体を実行します。Discordログインのメールアドレスが `private.site_config.owner_email` と一致すれば投稿者として扱われます。ログイン後の画面上の判定も同じ `is_site_owner()` 関数を使うため、URLやフロントエンドの別設定は不要です。
 
 設定後は投稿・プロフィール・リアクションをSupabaseへ保存し、Realtimeで開いている画面へ反映します。テーブルが未設定の間は、壊れた画面を出さないためブラウザ内保存へ自動的に切り替わります。Sites用のAPIアダプターは [`deployment/preview-api.js`](deployment/preview-api.js) にあります。
 
@@ -47,4 +47,4 @@ npm test
 
 APIテストとブラウザ操作確認を実施済みです。デザイン確認は `design-qa.md`、スクリーンショットは `qa/` を参照してください。
 
-初期の表示名は「とうま」、ユーザー名は `@touma816` です。プロフィール欄を押すと、投稿者だけが変更できます。
+初期の表示名は「桐慎」、ユーザー名は `@touma816` です。プロフィール欄を押すと、投稿者だけが変更できます。
